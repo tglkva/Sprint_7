@@ -13,18 +13,8 @@ class TestCreateOrderAndVerifyInList:
     @allure.title('Проверка наличия заказа в теле ответа при получении списка заказов')
 
     def test_create_order_and_verify_in_list(self):
-        payload = {
-            "firstName": "Иван",
-            "lastName": "Иванов",
-            "address": "Проспект мира 40",
-            "metroStation": 4,
-            "phone": "+7 867 334 38 90",
-            "rentTime": 5,
-            "deliveryDate": "2026-03-27",
-            "comment": " ",
-            "color": ["BLACK"]
-        }
 
+        payload = ORDER_PAYLOAD_1
         create_resp = requests.post(
             API_ORDER,
             json=payload,

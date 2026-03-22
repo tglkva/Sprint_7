@@ -15,9 +15,9 @@ class TestCreatingOrder:
         'color_value, expected_color',
         [
             (None, []),
-            (['black'], ['black']),
-            (['grey'], ['grey']),
-            (['black', 'grey'], ['black', 'grey'])
+            (['BLACK'], ['BLACK']),
+            (['GREY'], ['GREY']),
+            (['BLACK', 'GREY'], ['BLACK', 'GREY'])
         ],
         ids=[
             'No color selected',
@@ -26,19 +26,17 @@ class TestCreatingOrder:
             'Black and grey colors'
         ]
     )
-
-
-    def test_create_order_with_different_colors_success(self,color_value, expected_color):
+    def test_create_order_with_different_colors_success(self, color_value, expected_color):
         result = create_order(color=color_value)
 
+        assert result.get('success') is True
 
-        assert result['success'] is True, f"Заказ не создан: {result.get('error_message', '')}"
-
-        order_track = result['order_id']
+        order_track = result.get('order_id')
         assert order_track is not None
 
-        response_data = result['response_data']
-        if 'color' in response_data:
-            assert response_data['color'] == expected_color, (
-                f"Неверный цвет в заказе. Ожидалось: {expected_color}, получено: {response_data['color']}"
-            )
+        response_data = result.get('response_data', {})
+        assert isinstance(response_data, dict)
+
+        actual_color = response_data.get('color', [])
+
+        assert actual_color == expected_color

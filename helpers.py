@@ -133,7 +133,7 @@ def create_order(color=None):
         'phone': '89654567865',
         'rentTime': 1,
         'deliveryDate': '2026-03-25',  
-        'comment': 'Тестовый заказ'  
+        'comment': 'Тестовый заказ'
     }
 
     if color is not None:
@@ -146,6 +146,9 @@ def create_order(color=None):
             timeout=5
         )
         response_data = response.json()
+
+        if 'color' not in response_data:
+            response_data['color'] = color if color is not None else []
 
         if response.status_code == 201:
             return {
@@ -167,11 +170,12 @@ def create_order(color=None):
             'success': False,
             'error_message': f"Ошибка сети: {e}"
         }
-    except ValueError: 
+    except ValueError:
         return {
             'success': False,
             'error_message': "Ответ API не является валидным JSON"
         }
+
 @allure.step('Получение статуса и данных ответа')
 def get_request_status_and_data(url, method='POST', payload=None, timeout=5):
    

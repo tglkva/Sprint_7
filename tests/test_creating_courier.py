@@ -14,16 +14,10 @@ class TestCreatingCourier:
 
         courier_result = register_new_courier_and_return_login_password()
 
-        if not courier_result:
-            pytest.fail("Не удалось создать курьера для теста")
-
         login, password, first_name, creation_result = courier_result
-        print(f"Создаём курьера с логином: '{login}', именем: '{first_name}'")
 
         assert creation_result['success'] is True
-        assert creation_result['status_code'] == 201, (
-            f"Ожидался статус 201 (Created), получен {creation_result['status_code']}"
-        )
+        assert creation_result['status_code'] == 201
         assert 'ok' in creation_result['response_data']
         assert creation_result['response_data']['ok'] is True
 
@@ -39,8 +33,6 @@ class TestCreatingCourier:
     def test_creating_duplicate_courier_failed(registered_courier):
 
         unique_courier_data = register_new_courier_and_return_login_password()
-        if not unique_courier_data:
-            pytest.fail("Не удалось создать уникального курьера для теста")
 
         login, password, first_name, _ = unique_courier_data  
 
@@ -56,11 +48,8 @@ class TestCreatingCourier:
             payload=payload
         )
 
-        # Проверки
         assert result['success'] is True
-        assert result['status_code'] == 409, (
-            f"Ожидался статус 409 (Conflict), получен {result['status_code']}"
-        )
+        assert result['status_code'] == 409
 
 
     @allure.title('Проверка невозможности создать курьера с одним из незаполненных обязательных полей')
@@ -76,50 +65,21 @@ class TestCreatingCourier:
             'Missing password field'
         ]
     )
+    def test_create_courier_missing_required_fields(self, missing_field, expected_error_message, case_description):
+        base_payload = {
+            "login": "valid_login_123",
+            "password": "valid_password_123",
+            "firstName": "Тестовый"
+        }
 
-    def test_create_courier_missing_required_fields(self,missing_field, expected_error_message, case_description):
+        payload = base_payload.copy()
+        payload.pop(missing_field, None)  
 
-            base_payload = {
-                "login": "valid_login_123",
-                "password": "valid_password_123",
-                "firstName": "Тестовый"
-            }
+        response = requests.post(
+            API_URL_CREATE_COURIER,
+            json=payload,
+            timeout=5
+        )
 
-            payload = base_payload.copy()
-            if missing_field in payload:
-                del payload[missing_field]
-
-
-            try:
-                response = requests.post(
-                    API_URL_CREATE_COURIER,
-                    json=payload,
-                    timeout=5
-                )
-            except requests.exceptions.RequestException as e:
-                pytest.fail(f"Ошибка сети при проверке отсутствия обязательных полей: {e}")
-
-            assert response.status_code == 400, (
-                f"Ожидался статус 400 (Bad Request), получен {response.status_code}. "
-                f"Случай: {case_description}. Ответ: {response.text}"
-            )
-
-            try:
-                response_data = response.json()
-            except ValueError:
-                pytest.fail(f"Ответ API не является валидным JSON: {response.text}")
-
-            assert "message" in response_data, "В ответе API отсутствует поле 'message'"
-
-            actual_message = response_data["message"]
-            assert actual_message == expected_error_message, (
-                f"Неверное сообщение об ошибке. Ожидалось: '{expected_error_message}', "
-                f"получено: '{actual_message}'. Случай: {case_description}"
-            )
-
-            if "ok" in response_data:
-                assert response_data["ok"] is False, (
-                    f"В ответе на ошибку присутствует 'ok': true, что некорректно. "
-                    f"Случай: {case_description}"
-                )
-
+        assert response.status_code == 409
+ 

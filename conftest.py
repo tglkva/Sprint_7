@@ -8,26 +8,16 @@ from data import *
 
 @pytest.fixture
 def registered_courier():
-    class CourierContainer:
-        def __init__(self):
-            self.courier_id = None
-            self.login = None
-            self.password = None
 
-    container = CourierContainer()
-    yield container
+    payload = {
+        'courier_id': None,
+        'login': None,
+        'password': None
+    }
+    yield payload
 
-    # Очистка после теста
-    if container.courier_id is not None:
-        result = delete_courier(container.courier_id)
-        if result['success']:
-            print(f"Курьер ID '{container.courier_id}' успешно удалён")
-        else:
-            print(
-                f"Проблема при удалении курьера ID '{container.courier_id}': "
-                f"{result['error_message']}"
-            )
-
+    if payload['courier_id'] is not None:
+        result = delete_courier(payload['courier_id'])
 
 @pytest.fixture
 def delete_test_data(self):
