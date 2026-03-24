@@ -8,24 +8,18 @@ from data import *
 
 @pytest.fixture
 def registered_courier():
+    courier_result = register_new_courier_and_return_login_password()
+
+    login, password, first_name, result = courier_result
 
     payload = {
-        'courier_id': None,
-        'login': None,
-        'password': None
+        'courier_id': result.get('id'),
+        'login': login,
+        'password': password,
+        'first_name': first_name
     }
-    yield payload
+    yield payload  
+    delete_courier(payload['courier_id'])
 
-    if payload['courier_id'] is not None:
-        result = delete_courier(payload['courier_id'])
 
-@pytest.fixture
-def delete_test_data(self):
-    self.created_couriers = []
-    yield
-
-    for courier_id in self.created_couriers:
-        delete_result = delete_courier(courier_id)
-        if not delete_result['success']:
-            print(f'Не удалось удалить курьера с ID {courier_id}')
 

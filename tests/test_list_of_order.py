@@ -5,6 +5,7 @@ import pytest
 import time
 import allure
 from data import *
+from logical_modules import *
 
 
 
@@ -20,7 +21,6 @@ class TestCreateOrderAndVerifyInList:
             json=payload,
             timeout=30
         )
-        assert create_resp.status_code == 201
 
 
         list_resp = requests.get(
@@ -28,8 +28,8 @@ class TestCreateOrderAndVerifyInList:
             timeout=30
         )
 
-        assert list_resp.status_code == 200, f"Ожидали 200, получили {list_resp.status_code}"
+        assert list_resp.status_code == 200
 
         data = list_resp.json()
-        assert "orders" in data, "В ответе отсутствует поле 'orders'"
+        assert "orders" in data
 

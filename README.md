@@ -1,5 +1,5 @@
 Созданы тесты для проверки создания, авторизации курьеров; создания заказа и получения списка заказов.
-Внесены изменения
+Добавлены проверки на статус код и тело ответа во все тесты
 test_courier_can_authorize_successfully
 test_authorize_missing_required_fields
 test_authorize_with_incorrect_credentials

@@ -6,6 +6,7 @@ import allure
 from helpers import *
 from data import *
 from conftest import *
+from logical_modules import *
 
 class TestCreatingOrder:
 
@@ -29,14 +30,15 @@ class TestCreatingOrder:
     def test_create_order_with_different_colors_success(self, color_value, expected_color):
         result = create_order(color=color_value)
 
-        assert result.get('success') is True
-
         order_track = result.get('order_id')
         assert order_track is not None
 
         response_data = result.get('response_data', {})
         assert isinstance(response_data, dict)
 
-        actual_color = response_data.get('color', [])
+        assert result['status_code'] == 201
 
+        assert 'track' in response_data
+
+        actual_color = response_data.get('color', [])
         assert actual_color == expected_color

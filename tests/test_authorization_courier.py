@@ -6,7 +6,7 @@ import allure
 from helpers import *
 from data import *
 from conftest import *
-from helpers import *
+from logical_modules import *
 
 
 
@@ -31,13 +31,11 @@ class TestCourierAuthorization:
         assert auth_result['status_code'] == 200
         assert 'id' in auth_result['response_data']
 
-
-
     @pytest.mark.parametrize(
-        'missing_field, expected_keywords, case_description',
+        'missing_field',
         [
-            ('login', ['Недостаточно данных', 'для входа'], 'Отсутствует поле login'),
-            ('password', ['Недостаточно данных', 'для входа'], 'Отсутствует поле password'),
+            'login',
+            'password',
         ],
         ids=[
             'Missing login field',
@@ -47,15 +45,14 @@ class TestCourierAuthorization:
 
     @allure.title('Проверка невозможности авторизации с отсутствующими обязательными полями')
     @allure.description('Попытка авторизации с незаполненными полями логин или пароль')
-
-    def test_authorize_missing_required_fields(self, missing_field, expected_keywords, case_description):
+    def test_authorize_missing_required_fields(self, missing_field):
         base_payload = {
             "login": "valid_login_123",
             "password": "valid_password_123"
         }
 
         payload = base_payload.copy()
-        payload.pop(missing_field, None)  
+        payload.pop(missing_field, None)
 
         response = requests.post(
             API_URL_LOGIN,
@@ -64,21 +61,24 @@ class TestCourierAuthorization:
         )
 
         assert response.status_code == 400
+        response_data = response.json()
+        assert response_data['message'] == "Недостаточно данных для входа"
 
     @pytest.mark.parametrize(
-        'incorrect_field, incorrect_value, expected_keywords, case_description',
+        'incorrect_field, incorrect_value',
         [
-            ('login', 'nonexistent_login', ['Учётная запись', 'не найдена'], 'Неправильный логин'),
-            ('password', 'wrong_password', ['Учётная запись', 'не найдена'], 'Неправильный пароль'),
+            ('login', 'nonexistent_login'),
+            ('password', 'wrong_password'),
         ],
         ids=[
             'Incorrect login',
             'Incorrect password'
         ]
     )
-    @allure.title('Проверка невозможности авторизации с неправильными учетными данными')
+    @allure.title('Проверка невозможности авторизации с неправильными учётными данными')
+    @allure.description('Попытка авторизации с неверными логином или паролем')
 
-    def test_authorize_with_incorrect_credentials(self, incorrect_field, incorrect_value, expected_keywords, case_description):
+    def test_authorize_with_incorrect_credentials(self, incorrect_field, incorrect_value):
 
         courier_data = register_new_courier_and_return_login_password()
 
@@ -91,16 +91,20 @@ class TestCourierAuthorization:
 
         auth_result = get_courier_auth_result(test_login, test_password)
 
-        assert auth_result['success'] is True
         assert auth_result['status_code'] == 404
+        response_data = auth_result['response_data']
+        assert response_data['message'] == "Учетная запись не найдена"
 
     @allure.title('Проверка авторизации несуществующего курьера')
+    @allure.description('Попытка авторизации с учётными данными несуществующего курьера')
+
     def test_authorize_nonexistent_courier(self):
-    
+        
         nonexistent_login = "nonexistent_user_123"
         nonexistent_password = "random_password_456"
 
         auth_result = get_courier_auth_result(nonexistent_login, nonexistent_password)
 
-        assert auth_result['success'] is True
         assert auth_result['status_code'] == 404
+        response_data = auth_result['response_data']
+        assert response_data['message'] == "Учетная запись не найдена"
