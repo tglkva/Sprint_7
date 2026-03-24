@@ -1,0 +1,10 @@
+Созданы тесты для проверки создания, авторизации курьеров; создания заказа и получения списка заказов.
+Добавлены проверки на статус код и тело ответа во все тесты
+test_courier_can_authorize_successfully
+test_authorize_missing_required_fields
+test_authorize_with_incorrect_credentials
+test_authorize_nonexistent_courier
+test_creating_courier_success
+test_create_courier_missing_required_fields
+test_create_order_with_different_colors_success
+test_create_order_and_verify_in_list
